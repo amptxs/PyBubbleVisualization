@@ -18,16 +18,21 @@ def sheetsPrint(data_frame):
         print(data_frame[sheet])
 
 
-# Создать столбик с именами скважин
-def createNames(data_frame):
+# Нормализуем данные
+def normalize(data_frame):
     frame_keys = data_frame.keys()
     for sheet in frame_keys:
+        data_frame[sheet] = data_frame[sheet].iloc[1:]
         data_frame[sheet]['Имя'] = str(sheet)
+        data_frame[sheet] = data_frame[sheet][data_frame[sheet]['Добыча нефти,т'].notna()]
+        data_frame[sheet] = data_frame[sheet].astype({'Добыча нефти,т': int})
     return data_frame
 
 
 # Объединить листы
 def sheetsConcat(data_frame):
     return pd.concat(data_frame, ignore_index=True)
+
+
 
 
