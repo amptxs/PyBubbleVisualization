@@ -22,8 +22,10 @@ df = ep.sheetsConcat(
     Output("graph", "figure"),
     [Input('yearSlider', 'value'), Input('sizeSlider', 'value')])
 def update_figure(year, size):
-    fig = px.scatter(df.query("Дата==" + str(year)), x="Добыча нефти,т", y="Добыча жидкости,т",
-                     size="Добыча нефти,т", color="Способ", hover_name="Имя", log_x=True, size_max=size)
+    fig = px.scatter(df.query("Дата==" + str(year)), x="Дебит_нефти,т/сут", y="Дебит_жидкости,т/сут",
+                     size="Дебит_жидкости,т/сут", color="Способ", hover_name="Имя", log_x=True, size_max=size,
+                     height=600)
+
     return fig
 
 
