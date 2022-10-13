@@ -1,5 +1,6 @@
 import ExcelProcessor as ep
 import plotly.express as px
+import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output
 
 app = Dash(__name__)
@@ -13,18 +14,25 @@ app.layout = html.Div([
     dcc.Graph(id="graph")
 ])
 
-df = ep.sheetsConcat(
-        ep.normalize(
-            ep.readExcel('data/Data.xlsx')))
+df = ep.sheetsConcat(ep.normalize(ep.readExcel()))
 
 
 @app.callback(
     Output("graph", "figure"),
     [Input('yearSlider', 'value'), Input('sizeSlider', 'value')])
 def update_figure(year, size):
-    fig = px.scatter(df.query("Дата==" + str(year)), x="Дебит_нефти,т/сут", y="Дебит_жидкости,т/сут",
+    fig = go.FigureWidget(px.scatter(df.query("Дата==" + str(year)), x="X", y="Y",
                      size="Дебит_жидкости,т/сут", color="Способ", hover_name="Имя", log_x=True, size_max=size,
-                     height=600)
+                     height=600, hover_data={
+            "X": False,
+            "Y": False,
+            "Способ": False,
+            "Дебит_нефти,т/сут": True,
+            "Дебит_жидкости,т/сут": True
+    }))
+
+    scatter = fig.data[0]
+    scatter.on_click(print("test"))
 
     return fig
 
