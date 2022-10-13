@@ -1,40 +1,46 @@
 import ExcelProcessor as ep
-import plotly.express as px
-import plotly.graph_objects as go
-from dash import Dash, dcc, html, Input, Output
+from math import pi
 
-app = Dash(__name__)
-app.layout = html.Div([
-    html.P("Год:"),
-    dcc.Slider(id='yearSlider', min=2016, max=2021, step=1, value=2016,
-               marks={x: str(x) for x in [2016, 2017, 2018, 2019, 2020, 2021]}),
-    html.P("Размер:"),
-    dcc.Slider(id='sizeSlider', min=10, max=130, step=5, value=60,
-               marks={x: str(x) for x in [10, 30, 50, 70, 90, 110, 130]}),
-    dcc.Graph(id="graph")
-])
+import pandas as pd
 
-df = ep.sheetsConcat(ep.normalize(ep.readExcel()))
+from bokeh.io import output_file, show
+from bokeh.layouts import row
+from bokeh.palettes import Category20c
+from bokeh.plotting import figure
+from bokeh.transform import cumsum
 
 
-@app.callback(
-    Output("graph", "figure"),
-    [Input('yearSlider', 'value'), Input('sizeSlider', 'value')])
-def update_figure(year, size):
-    fig = go.FigureWidget(px.scatter(df.query("Дата==" + str(year)), x="X", y="Y",
-                     size="Дебит_жидкости,т/сут", color="Способ", hover_name="Имя", log_x=True, size_max=size,
-                     height=600, hover_data={
-            "X": False,
-            "Y": False,
-            "Способ": False,
-            "Дебит_нефти,т/сут": True,
-            "Дебит_жидкости,т/сут": True
-    }))
+Map = figure(title="Pie map", plot_width=1500, plot_height=700)
+df = ep.normalize(ep.readExcel())
 
-    scatter = fig.data[0]
-    scatter.on_click(print("test"))
+year = 2016
+for name in df.keys():
+    localPie = df[name].loc[df[name]['Дата'] == year]
+    if not localPie.empty:
+        if 'X' in localPie:
+            X = localPie['X'].values[0]
+            Y = localPie['Y'].values[0]
+            debitFluid = localPie['Дебит_жидкости,т/сут'].values[0]
+            debitPetrol = localPie['Дебит_нефти,т/сут'].values[0]
 
-    return fig
+            percent = debitPetrol / debitFluid
+            pieFigure = figure(x_range=(-1, 1), y_range=(-1, 1))
+            starts = [pi / 2, pi * 2 * percent + pi / 2]
+            ends = [pi / 2 + pi * 2 * percent, pi / 2 + 2 * pi]
+            pieColors = ['brown', 'blue']
+
+            # TODO legend field
+            Map.wedge(x=X, y=Y, radius=100,
+                      start_angle=starts, end_angle=ends,
+                      line_color="white", color=pieColors)
 
 
-app.run_server(debug=True)
+
+
+#Map.wedge(x=0, y=1, radius=0.1,
+#        start_angle=cumsum('angle', include_zero=True), end_angle=cumsum('angle'),
+#        line_color="white", fill_color='color', legend='country', source=data)
+
+
+
+show(Map)

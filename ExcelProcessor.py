@@ -22,7 +22,6 @@ def sheetsPrint(data_frame):
 def normalize(data_frame):
     frame_keys = data_frame.keys()
     dfLoc = pd.read_excel('data/Location.xlsx', engine='openpyxl')
-    index = 1
     for sheet in frame_keys:
         data_frame[sheet].columns = data_frame[sheet].columns.map('_'.join)
         data_frame[sheet] = data_frame[sheet].rename(columns=lambda x: x if not 'Unnamed' in str(x) else x.partition("_Unnamed")[0])
@@ -34,7 +33,6 @@ def normalize(data_frame):
             data_frame[sheet]['Y'] = y
         data_frame[sheet] = data_frame[sheet][data_frame[sheet]['Дебит_нефти,т/сут'].notna()]
         data_frame[sheet] = data_frame[sheet].astype({'Дебит_нефти,т/сут': int})
-        index+=1
     return data_frame
 
 
