@@ -1,5 +1,6 @@
 from bokeh.models import WheelZoomTool
 
+from LinearPlotter import LinearPlotter
 import ExcelProcessor as ep
 from math import pi
 from bokeh.io import output_file, show
@@ -53,4 +54,6 @@ for name in df.keys():
                                          code="other.radius = this.value * size"))
 
 
-show(column(radio_button_group, slider, Map))
+dfConcated = ep.sheetsConcat(ep.normalize(ep.readExcel()))
+plotter = LinearPlotter(dfConcated, "15015Г")
+show(column(radio_button_group, slider, Map, plotter.show()))
